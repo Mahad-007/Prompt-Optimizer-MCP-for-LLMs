@@ -5,10 +5,18 @@ Prompt Optimizer MCP Server
 A Model Context Protocol server that provides tools for optimizing and scoring LLM prompts.
 """
 
+import logging
+import sys
 from typing import List, Literal
-from mcp.server.fastmcp import FastMCP
-from mcp.server.models import InitializationOptions
+from fastmcp import FastMCP
 from tools.optimize import optimize_prompt, score_prompt
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Initialize the FastMCP server
 app = FastMCP("prompt-optimizer")
@@ -26,7 +34,14 @@ def optimize_prompt_tool(raw_prompt: str, style: Literal['creative', 'precise', 
     Returns:
         List[str]: 3 optimized prompt variants
     """
-    return optimize_prompt(raw_prompt, style)
+    try:
+        logger.info(f"Optimizing prompt with style: {style}")
+        result = optimize_prompt(raw_prompt, style)
+        logger.info(f"Successfully generated {len(result)} variants")
+        return result
+    except Exception as e:
+        logger.error(f"Error optimizing prompt: {e}")
+        raise
 
 @app.tool()
 def score_prompt_tool(raw_prompt: str, improved_prompt: str) -> float:
@@ -45,8 +60,23 @@ def score_prompt_tool(raw_prompt: str, improved_prompt: str) -> float:
     Returns:
         float: Effectiveness score between 0.0 and 1.0
     """
-    return score_prompt(raw_prompt, improved_prompt)
+    try:
+        logger.info("Scoring prompt improvement")
+        result = score_prompt(raw_prompt, improved_prompt)
+        logger.info(f"Score: {result}")
+        return result
+    except Exception as e:
+        logger.error(f"Error scoring prompt: {e}")
+        raise
 
 if __name__ == "__main__":
-    # Configure for STDIO transport (default for local development)
-    app.run() 
+    try:
+        logger.info("Starting Prompt Optimizer MCP Server...")
+        # Configure for STDIO transport (default for local development)
+        app.run()
+    except KeyboardInterrupt:
+        logger.info("Server stopped by user")
+        sys.exit(0)
+    except Exception as e:
+        logger.error(f"Server failed to start: {e}")
+        sys.exit(1) 
