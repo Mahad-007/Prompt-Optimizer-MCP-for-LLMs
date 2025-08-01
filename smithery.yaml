@@ -12,36 +12,9 @@ entrypoint: server.py
 dependencies:
   - mcp-server-fastmcp>=0.1.0
 
-# Environment variables (if needed)
+# Environment variables
 environment:
   PYTHONPATH: .
-
-# Health check endpoint (if applicable)
-health_check:
-  path: /health
-  port: 8000
-
-# Resources
-resources:
-  cpu: 0.5
-  memory: 512Mi
-
-# Scaling configuration
-scaling:
-  min_replicas: 1
-  max_replicas: 5
-  target_cpu_utilization: 70
-
-# Networking
-networking:
-  ports:
-    - port: 8000
-      protocol: HTTP
-  ingress:
-    - host: prompt-optimizer-mcp.smithery.ai
-      paths:
-        - path: /
-          service: prompt-optimizer-mcp
 
 # Build configuration
 build:
@@ -50,8 +23,13 @@ build:
   args:
     PYTHON_VERSION: 3.11
 
-# Deployment strategy
-deployment:
-  strategy: rolling
-  max_surge: 1
-  max_unavailable: 0 
+# Resources
+resources:
+  cpu: 0.5
+  memory: 512Mi
+
+# Scaling
+scaling:
+  min_replicas: 1
+  max_replicas: 3
+  target_cpu_utilization: 70 

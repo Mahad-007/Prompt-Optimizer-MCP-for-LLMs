@@ -1,0 +1,22 @@
+{
+  "name": "prompt-optimizer-mcp",
+  "description": "A Model Context Protocol server for optimizing and scoring LLM prompts",
+  "version": "1.0.0",
+  "runtime": "python",
+  "entrypoint": "server.py",
+  "dependencies": {
+    "mcp-server-fastmcp": ">=0.1.0"
+  },
+  "environment": {
+    "PYTHONPATH": "."
+  },
+  "resources": {
+    "cpu": 0.5,
+    "memory": "512Mi"
+  },
+  "scaling": {
+    "minReplicas": 1,
+    "maxReplicas": 3,
+    "targetCPUUtilization": 70
+  }
+} 
