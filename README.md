@@ -39,26 +39,30 @@ The scoring system evaluates prompts based on:
 - ✅ **Error-free**: Comprehensive input validation and error handling
 - ✅ **Fast**: Simple heuristics for quick processing
 - ✅ **Extensible**: Easy to add new styles and scoring metrics
+- ✅ **Dual Transport**: Supports both STDIO (MCP) and HTTP (deployment)
 
 ## 📁 Project Structure
 
 ```
 prompt-optimizer-mcp/
 ├── 📄 README.md              # This file
-├── 📄 server.py              # Main MCP server
+├── 📄 server.py              # Main MCP server (STDIO transport)
+├── 📄 http_server.py         # HTTP server for deployment
+├── 📄 start.py               # Startup script (auto-detects mode)
 ├── 📄 requirements.txt       # Python dependencies
-├── 📄 demo.py               # Demo script
-├── 📄 smithery.yaml         # Smithery deployment config
-├── 📄 Dockerfile            # Container configuration
-├── 📄 .gitignore            # Git ignore rules
+├── 📄 test_server.py         # Test script
+├── 📄 deploy.py              # Deployment script
+├── 📄 Dockerfile             # Container configuration
+├── 📄 .gitignore             # Git ignore rules
 ├── 📁 tools/
-│   ├── 📄 __init__.py       # Package initialization
-│   └── 📄 optimize.py       # Core optimization logic
+│   ├── 📄 __init__.py        # Package initialization
+│   └── 📄 optimize.py        # Core optimization logic
 ├── 📁 tests/
-│   ├── 📄 __init__.py       # Test package initialization
-│   └── 📄 test_optimize.py  # Unit tests
-└── 📁 .cursor/
-    └── 📄 mcp.json          # Cursor IDE configuration
+│   ├── 📄 __init__.py        # Test package initialization
+│   └── 📄 test_optimize.py   # Unit tests
+└── 📁 .github/
+    └── 📁 workflows/
+        └── 📄 ci.yml         # CI/CD pipeline
 ```
 
 ## 🚀 Quick Start
@@ -66,8 +70,8 @@ prompt-optimizer-mcp/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/prompt-optimizer-mcp.git
-cd prompt-optimizer-mcp
+git clone https://github.com/Mahad-007/Prompt-Optimizer-MCP-for-LLMs.git
+cd Prompt-Optimizer-MCP-for-LLMs
 ```
 
 ### 2. Install Dependencies
@@ -79,13 +83,17 @@ pip install -r requirements.txt
 ### 3. Run Tests
 
 ```bash
-python -m unittest tests.test_optimize -v
+python test_server.py
 ```
 
-### 4. Try the Demo
+### 4. Start the Server
 
 ```bash
-python demo.py
+# For local development (STDIO mode)
+python server.py
+
+# For deployment (HTTP mode)
+python start.py
 ```
 
 ## 🛠️ Installation
@@ -98,10 +106,7 @@ python demo.py
 ### Install Dependencies
 
 ```bash
-# Install the required packages
-pip install mcp-server-fastmcp>=0.1.0
-
-# Or install from requirements.txt
+# Install from requirements.txt
 pip install -r requirements.txt
 ```
 
@@ -168,6 +173,25 @@ score = score_prompt(
 # Returns: 0.85 (high score due to length reduction and clarity improvement)
 ```
 
+### HTTP API Usage
+
+When deployed, the server also provides HTTP endpoints:
+
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Optimize prompt
+curl -X POST http://localhost:8000/optimize \
+  -H "Content-Type: application/json" \
+  -d '{"raw_prompt": "Write about AI", "style": "creative"}'
+
+# Score prompt
+curl -X POST http://localhost:8000/score \
+  -H "Content-Type: application/json" \
+  -d '{"raw_prompt": "Write about AI", "improved_prompt": "Write about artificial intelligence"}'
+```
+
 ### Direct Python Usage
 
 ```python
@@ -188,6 +212,9 @@ Run the comprehensive test suite:
 
 ```bash
 # Run all tests
+python test_server.py
+
+# Run unit tests
 python -m unittest tests.test_optimize -v
 
 # Run specific test classes
@@ -198,7 +225,24 @@ python -m unittest tests.test_optimize.TestIntegration
 
 ## 🚀 Deployment
 
-### Deploy to Smithery
+### Automated Deployment
+
+Use the deployment script:
+
+```bash
+python deploy.py
+```
+
+This will:
+1. Run all tests
+2. Install dependencies
+3. Run linting checks
+4. Build Docker image (if available)
+5. Create deployment package
+
+### Manual Deployment
+
+#### Deploy to Smithery
 
 1. **Install Smithery CLI:**
    ```bash
@@ -220,6 +264,23 @@ python -m unittest tests.test_optimize.TestIntegration
    ./deploy.sh
    ```
 
+#### Deploy with Docker
+
+```bash
+# Build the image
+docker build -t prompt-optimizer-mcp:latest .
+
+# Run the container
+docker run -p 8000:8000 prompt-optimizer-mcp:latest
+```
+
+#### Deploy to Other Platforms
+
+The server supports both STDIO (for MCP clients) and HTTP (for web deployment) transports:
+
+- **STDIO Mode**: `python server.py` (for MCP clients)
+- **HTTP Mode**: `python start.py` (for web deployment)
+
 Your MCP server will be available at: `https://prompt-optimizer-mcp.smithery.ai`
 
 For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
@@ -239,11 +300,14 @@ Modify the `score_prompt` function in `tools/optimize.py` to include additional 
 ### Running Locally
 
 ```bash
-# Start the MCP server
+# Start the MCP server (STDIO mode)
 python server.py
 
-# In another terminal, test with an MCP client
-# The server will be available via STDIO transport
+# Start the HTTP server (deployment mode)
+python http_server.py
+
+# Auto-detect mode based on environment
+python start.py
 ```
 
 ## 📊 Performance
@@ -267,14 +331,14 @@ We welcome contributions! Please follow these steps:
 
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/prompt-optimizer-mcp.git
-cd prompt-optimizer-mcp
+git clone https://github.com/yourusername/Prompt-Optimizer-MCP-for-LLMs.git
+cd Prompt-Optimizer-MCP-for-LLMs
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Run tests
-python -m unittest tests.test_optimize -v
+python test_server.py
 
 # Make your changes and test
 python demo.py
@@ -287,18 +351,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [Model Context Protocol](https://modelcontextprotocol.io/) for the MCP specification
-- [FastMCP](https://github.com/microsoft/mcp-server-fastmcp) for the server framework
+- [MCP Python SDK](https://github.com/microsoft/mcp) for the server framework
 - [Smithery](https://smithery.ai) for deployment platform
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/prompt-optimizer-mcp/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/prompt-optimizer-mcp/discussions)
+- **Issues**: [GitHub Issues](https://github.com/Mahad-007/Prompt-Optimizer-MCP-for-LLMs/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Mahad-007/Prompt-Optimizer-MCP-for-LLMs/discussions)
 - **Documentation**: [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ## ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/prompt-optimizer-mcp&type=Date)](https://star-history.com/#yourusername/prompt-optimizer-mcp&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=Mahad-007/Prompt-Optimizer-MCP-for-LLMs&type=Date)](https://star-history.com/#Mahad-007/Prompt-Optimizer-MCP-for-LLMs&Date)
 
 ---
 

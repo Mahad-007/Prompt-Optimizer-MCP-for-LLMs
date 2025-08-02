@@ -46,8 +46,16 @@ class HealthResponse(BaseModel):
     message: str
 
 @app.get("/", response_model=HealthResponse)
+async def root():
+    """Root endpoint."""
+    return HealthResponse(
+        status="healthy",
+        message="Prompt Optimizer MCP Server is running"
+    )
+
+@app.get("/health", response_model=HealthResponse)
 async def health_check():
-    """Health check endpoint."""
+    """Health check endpoint for Docker."""
     return HealthResponse(
         status="healthy",
         message="Prompt Optimizer MCP Server is running"
